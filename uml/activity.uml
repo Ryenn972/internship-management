@@ -1,0 +1,19 @@
+@startuml Activity diagram
+start
+:Consulter une offre de stage;
+
+:Déposer une candidature;
+
+:Étude de la candidature;
+
+if (Candidature acceptée ?) then (Oui)
+  :Valider la candidature;
+  :Notifier l'étudiant;
+  :Envoyer la candidature à l'entreprise;
+else (Non)
+  :Refuser la candidature;
+  :Notifier l'étudiant;
+endif
+
+stop
+@enduml

@@ -1,0 +1,37 @@
+@startuml Sequence diagram
+actor Etudiant
+actor Responsable
+
+participant "Interface Utilisateur" as UI #64B5F6
+participant "Couche Métier" as Metier #81C784
+database "Base de Données" as DB #FFB74D
+
+Etudiant -> UI : Se connecter
+UI -> Metier : verifierLogin()
+Metier -> DB : getUser()
+DB --> Metier : user
+Metier --> UI : connexion OK
+
+Etudiant -> UI : Consulter offres
+UI -> Metier : getOffres()
+Metier -> DB : selectOffres()
+DB --> Metier : listeOffres
+Metier --> UI : listeOffres
+
+Etudiant -> UI : Soumettre candidature
+UI -> Metier : submitCandidature()
+Metier -> DB : insertCandidature()
+DB --> Metier : OK
+
+Responsable -> UI : Consulter candidatures
+UI -> Metier : getCandidatures()
+Metier -> DB : selectCandidatures()
+DB --> Metier : listeCandidatures
+Metier --> UI : liste
+
+Responsable -> UI : Valider/Refuser candidature
+UI -> Metier : updateStatut()
+Metier -> DB : updateCandidature()
+DB --> Metier : OK
+
+@enduml

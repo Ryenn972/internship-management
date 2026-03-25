@@ -1,0 +1,44 @@
+@startuml Use case diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam backgroundColor #F9F9F9
+
+actor Etudiant #4CAF50
+actor Entreprise #2196F3
+actor "Responsable pédagogique" as Responsable #FF9800
+actor Administrateur #9C27B0
+
+rectangle "Système de gestion des stages" {
+
+  usecase "Se connecter" as UC1
+  usecase "Consulter offres" as UC2
+  usecase "Postuler à une offre" as UC3
+  usecase "Recevoir notification" as UC4
+
+  usecase "Gérer offres (CRUD)" as UC5
+  usecase "Consulter candidatures" as UC6
+  usecase "Valider candidature" as UC7
+  usecase "Refuser candidature" as UC8
+
+  usecase "Gérer utilisateurs" as UC9
+}
+
+Etudiant --> UC1
+Etudiant --> UC2
+Etudiant --> UC3
+Etudiant --> UC4
+
+Entreprise --> UC1
+Entreprise --> UC5
+
+Responsable --> UC1
+Responsable --> UC6
+Responsable --> UC7
+Responsable --> UC8
+
+Administrateur --> UC9
+
+UC7 .> UC4 : <<include>>
+UC8 .> UC4 : <<include>>
+
+@enduml
