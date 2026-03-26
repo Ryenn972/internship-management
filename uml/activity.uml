@@ -1,18 +1,54 @@
 @startuml Activity diagram
+title Traitement d'une candidature à une offre de stage
+
+skinparam backgroundColor #F7F7F7
+skinparam activity {
+  BackgroundColor #BBDEFB
+  BorderColor #1E88E5
+  FontColor black
+}
+skinparam partition {
+  BackgroundColor #E3F2FD
+  BorderColor #64B5F6
+}
+
+|Etudiant|
 start
-:Consulter une offre de stage;
+:Consulter les offres;
+:Tente de déposer une candidature;
 
-:Déposer une candidature;
+|Système|
+if (Est-il connecté ?) then (Oui)
+else (Non)
+    :Demander connexion;
+    |Etudiant|
+    :Saisir login et mot de passe;
+    |Système|
+    :Vérifier identifiants;
+    while (Identifiants valides ?) is (Non)
+        :Afficher erreur;
+        |Etudiant|
+        :Ressaisir login et mot de passe;
+        |Système|
+        :Vérifier identifiants;
+    endwhile (Oui)
+endif
 
-:Étude de la candidature;
+:Enregistre la candidature;
+:Transmettre la candidature au responsable;
+
+|Responsable pédagogique|
+:Étudier la candidature;
 
 if (Candidature acceptée ?) then (Oui)
-  :Valider la candidature;
-  :Notifier l'étudiant;
-  :Envoyer la candidature à l'entreprise;
+    :Valider la candidature;
+    |Système|
+    :Notifier l'étudiant;
+    :Envoyer la candidature à l'entreprise;
 else (Non)
-  :Refuser la candidature;
-  :Notifier l'étudiant;
+    :Refuser la candidature;
+    |Système|
+    :Notifier le refus à l'étudiant;
 endif
 
 stop

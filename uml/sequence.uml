@@ -1,4 +1,6 @@
 @startuml Sequence diagram
+title Diagramme de séquence - Gestion candidature stage
+
 actor Etudiant
 actor Responsable
 
@@ -6,32 +8,59 @@ participant "Interface Utilisateur" as UI #64B5F6
 participant "Couche Métier" as Metier #81C784
 database "Base de Données" as DB #FFB74D
 
-Etudiant -> UI : Se connecter
-UI -> Metier : verifierLogin()
-Metier -> DB : getUser()
-DB --> Metier : user
-Metier --> UI : connexion OK
-
-Etudiant -> UI : Consulter offres
+== Consultation des offres ==
+Etudiant -> UI : consulterOffres()
 UI -> Metier : getOffres()
 Metier -> DB : selectOffres()
 DB --> Metier : listeOffres
 Metier --> UI : listeOffres
+UI --> Etudiant : afficherOffres
 
-Etudiant -> UI : Soumettre candidature
-UI -> Metier : submitCandidature()
+== Dépôt candidature ==
+Etudiant -> UI : soumettreCandidature()
+
+opt Utilisateur non connecté
+    UI -> Etudiant : demanderConnexion
+    Etudiant -> UI : saisirLogin(mdp)
+    UI -> Metier : verifierLogin()
+    Metier -> DB : getUser()
+    DB --> Metier : null
+
+    alt Identifiants invalides
+        Metier --> UI : erreurConnexion
+        UI --> Etudiant : afficherErreur
+    else Identifiants valides
+        DB --> Metier : user
+        Metier --> UI : connexionOK
+    end
+end
+
+UI -> Metier : creerCandidature()
 Metier -> DB : insertCandidature()
 DB --> Metier : OK
+Metier --> UI : candidatureEnregistree
+UI --> Etudiant : confirmationDepot
 
-Responsable -> UI : Consulter candidatures
+== Traitement par responsable ==
+Responsable -> UI : consulterCandidatures()
 UI -> Metier : getCandidatures()
 Metier -> DB : selectCandidatures()
-DB --> Metier : listeCandidatures
+DB --> Metier : liste
 Metier --> UI : liste
+UI --> Responsable : afficherCandidatures
 
-Responsable -> UI : Valider/Refuser candidature
+Responsable -> UI : validerOuRefuser()
 UI -> Metier : updateStatut()
 Metier -> DB : updateCandidature()
 DB --> Metier : OK
+
+alt Candidature validée
+    Metier -> DB : creerNotification()
+    Metier --> UI : notifierEtudiant
+    Metier --> UI : notifierEntreprise
+else Candidature refusée
+    Metier -> DB : creerNotificationRefus()
+    Metier --> UI : notifierEtudiant
+end
 
 @enduml
