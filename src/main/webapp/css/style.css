@@ -29,6 +29,11 @@ a:hover { color: #1a6fa8; }
     color: white;
     font-size: 1.1rem;
     font-weight: bold;
+    text-decoration: none;
+}
+
+.nav-brand:hover {
+    color: #3498db;
 }
 
 .navbar a {

@@ -28,4 +28,8 @@ public class ApplicationService {
     public int getStudentIdByApplication(int idApplication) {
         return applicationDAO.getStudentIdByApplication(idApplication);
     }
+
+    public int getOfferIdByApplication(int idApplication) {
+        return applicationDAO.getOfferIdByApplication(idApplication);
+    }
 }

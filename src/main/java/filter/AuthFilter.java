@@ -2,23 +2,14 @@ package filter;
 
 import model.User;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.*;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.*;
 import java.io.IOException;
 
-/**
- * Filtre de sécurité global.
- * - Si l'utilisateur n'est pas connecté → redirige vers /login
- * - Bloque l'accès aux routes réservées selon le rôle :
- *     /admin/*  → rôle 4 (admin)
- *     /manager* → rôle 3 (manager)
- *     /offer POST (add/update/delete) → rôle 2 (company)
- */
 @WebFilter("/*")
 public class AuthFilter implements Filter {
 
-    // Pages publiques (accessibles sans session)
     private static final String[] PUBLIC = {"/login", "/register", "/index.jsp"};
 
     @Override
@@ -28,10 +19,17 @@ public class AuthFilter implements Filter {
         HttpServletRequest  request  = (HttpServletRequest)  req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        String path = request.getServletPath();
+        String path   = request.getServletPath();
+        String method = request.getMethod();
 
-        // Laisser passer les ressources statiques et les pages publiques
+        // Ressources statiques et pages publiques
         if (isPublic(path)) {
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // Consultation des offres accessible sans connexion (GET uniquement)
+        if (path.equals("/offer") && "GET".equals(method)) {
             chain.doFilter(req, res);
             return;
         }

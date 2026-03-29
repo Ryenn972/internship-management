@@ -1,24 +1,22 @@
 package controller;
 
+import model.InternshipOffer;
 import model.User;
 import service.ApplicationService;
 import service.NotificationService;
+import service.OfferService;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 import java.io.IOException;
 
-/**
- * Servlet dédié au responsable pédagogique (rôle 3).
- * Délègue les actions validate/reject à ApplicationServlet via redirect,
- * et expose une vue filtrée des candidatures.
- */
 @WebServlet("/manager")
 public class ManagerServlet extends HttpServlet {
 
     private final ApplicationService  applicationService  = new ApplicationService();
     private final NotificationService notificationService = new NotificationService();
+    private final OfferService        offerService        = new OfferService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -27,7 +25,6 @@ public class ManagerServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute("user");
 
-        // Vérification du rôle
         if (user == null || user.getIdRole() != 3) {
             response.sendRedirect(request.getContextPath() + "/jsp/dashboard.jsp");
             return;
@@ -47,10 +44,23 @@ public class ManagerServlet extends HttpServlet {
             case "validate":
                 int idVal = Integer.parseInt(request.getParameter("id"));
                 applicationService.updateStatus(idVal, "VALIDATED");
+
+                // Notification étudiant
                 int sIdVal = applicationService.getStudentIdByApplication(idVal);
                 if (sIdVal != -1) {
                     notificationService.sendNotification(sIdVal,
                             "Votre candidature a été validée par le responsable pédagogique.");
+                }
+
+                // Notification entreprise (uniquement si validé)
+                int offerIdVal = applicationService.getOfferIdByApplication(idVal);
+                if (offerIdVal != -1) {
+                    InternshipOffer offer = offerService.getOfferById(offerIdVal);
+                    if (offer != null) {
+                        notificationService.sendNotification(offer.getCompanyId(),
+                                "Une candidature pour votre offre \"" + offer.getTitle() +
+                                        "\" a été validée par le responsable pédagogique.");
+                    }
                 }
                 response.sendRedirect(request.getContextPath() + "/manager?action=list");
                 break;
@@ -58,6 +68,8 @@ public class ManagerServlet extends HttpServlet {
             case "reject":
                 int idRej = Integer.parseInt(request.getParameter("id"));
                 applicationService.updateStatus(idRej, "REJECTED");
+
+                // Notification étudiant uniquement (pas l'entreprise en cas de refus)
                 int sIdRej = applicationService.getStudentIdByApplication(idRej);
                 if (sIdRej != -1) {
                     notificationService.sendNotification(sIdRej,

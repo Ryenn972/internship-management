@@ -15,7 +15,7 @@
 <body>
 
 <nav class="navbar">
-    <span class="nav-brand">🎓 Gestion des stages</span>
+    <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp" class="nav-brand">🎓 Gestion des stages</a>
     <div>
         <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp">Dashboard</a>
         <a href="${pageContext.request.contextPath}/offer?action=list">Offres</a>
