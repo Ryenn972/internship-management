@@ -18,12 +18,16 @@
 <body>
 
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp" class="nav-brand">🎓 Gestion des stages</a>
+    <span class="nav-brand">🎓 Gestion des stages</span>
     <div>
         <a href="${pageContext.request.contextPath}/offer?action=list">Offres</a>
 
         <% if (role == 1) { %>
             <a href="${pageContext.request.contextPath}/application?action=list">Mes candidatures</a>
+            <a href="${pageContext.request.contextPath}/notifications">Notifications</a>
+        <% } %>
+
+        <% if (role == 2) { %>
             <a href="${pageContext.request.contextPath}/notifications">Notifications</a>
         <% } %>
 
@@ -82,6 +86,11 @@
                 <h3>➕ Nouvelle offre</h3>
                 <p>Publiez une nouvelle offre de stage.</p>
                 <a class="btn" href="${pageContext.request.contextPath}/offer?action=add">Ajouter une offre</a>
+            </div>
+            <div class="card">
+                <h3>🔔 Notifications</h3>
+                <p>Consultez les candidatures validées pour vos offres.</p>
+                <a class="btn" href="${pageContext.request.contextPath}/notifications">Notifications</a>
             </div>
         <% } else if (role == 3) { %>
             <div class="card">

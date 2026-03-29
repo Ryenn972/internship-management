@@ -16,12 +16,15 @@
 <body>
 
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp" class="nav-brand">🎓 Gestion des stages</a>
+    <span class="nav-brand">🎓 Gestion des stages</span>
     <div>
         <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp">Dashboard</a>
         <a href="${pageContext.request.contextPath}/offer?action=list">Offres</a>
         <% if (role == 1) { %>
             <a href="${pageContext.request.contextPath}/application?action=list">Mes candidatures</a>
+            <a href="${pageContext.request.contextPath}/notifications">Notifications</a>
+        <% } %>
+        <% if (role == 2) { %>
             <a href="${pageContext.request.contextPath}/notifications">Notifications</a>
         <% } %>
         <% if (role == 3) { %><a href="${pageContext.request.contextPath}/manager?action=list">Candidatures</a><% } %>
