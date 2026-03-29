@@ -11,54 +11,92 @@ import java.io.IOException;
 @WebServlet("/admin")
 public class AdminServlet extends HttpServlet {
 
-    private UserService userService = new UserService();
+    private final UserService userService = new UserService();
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("user");
 
+        if (user == null || user.getIdRole() != 4) {
+            response.sendRedirect(request.getContextPath() + "/jsp/dashboard.jsp");
+            return;
+        }
+
+        String action = request.getParameter("action");
         if (action == null) action = "list";
 
         switch (action) {
+
             case "list":
                 request.setAttribute("users", userService.getAllUsers());
-                request.getRequestDispatcher("jsp/manageUsers.jsp").forward(request, response);
+                request.getRequestDispatcher("/jsp/manageUsers.jsp").forward(request, response);
                 break;
 
             case "delete":
                 int idDelete = Integer.parseInt(request.getParameter("id"));
-                userService.deleteUser(idDelete);
-                response.sendRedirect("admin?action=list");
+                // Empêcher de supprimer son propre compte
+                if (idDelete != user.getIdUser()) {
+                    userService.deleteUser(idDelete);
+                }
+                response.sendRedirect(request.getContextPath() + "/admin?action=list");
                 break;
 
             case "role":
                 int idUser = Integer.parseInt(request.getParameter("id"));
                 int roleId = Integer.parseInt(request.getParameter("role"));
                 userService.updateUserRole(idUser, roleId);
-                response.sendRedirect("admin?action=list");
+                response.sendRedirect(request.getContextPath() + "/admin?action=list");
                 break;
+
+            default:
+                response.sendRedirect(request.getContextPath() + "/admin?action=list");
         }
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("user");
+
+        if (user == null || user.getIdRole() != 4) {
+            response.sendRedirect(request.getContextPath() + "/jsp/dashboard.jsp");
+            return;
+        }
+
         String firstName = request.getParameter("firstName");
-        String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        int roleId = Integer.parseInt(request.getParameter("roleId"));
+        String lastName  = request.getParameter("lastName");
+        String email     = request.getParameter("email");
+        String password  = request.getParameter("password");
+        int    roleId    = Integer.parseInt(request.getParameter("roleId"));
 
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRoleId(roleId);
+        if (firstName == null || email == null || password == null ||
+                firstName.trim().isEmpty() || email.trim().isEmpty() || password.trim().isEmpty()) {
+            request.setAttribute("error", "Tous les champs sont obligatoires.");
+            request.setAttribute("users", userService.getAllUsers());
+            request.getRequestDispatcher("/jsp/manageUsers.jsp").forward(request, response);
+            return;
+        }
 
-        userService.addUser(user);
+        User newUser = new User();
+        newUser.setFirstName(firstName.trim());
+        newUser.setLastName(lastName != null ? lastName.trim() : "");
+        newUser.setEmail(email.trim());
+        newUser.setPassword(password); // hashé dans UserDAO.register()
+        newUser.setIdRole(roleId);
 
-        response.sendRedirect("admin?action=list");
+        boolean ok = userService.addUser(newUser);
+        if (!ok) {
+            request.setAttribute("error", "Cet email est déjà utilisé.");
+            request.setAttribute("users", userService.getAllUsers());
+            request.getRequestDispatcher("/jsp/manageUsers.jsp").forward(request, response);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/admin?action=list");
     }
 }

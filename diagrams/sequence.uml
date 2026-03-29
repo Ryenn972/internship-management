@@ -24,9 +24,9 @@ opt Utilisateur non connecté
     Etudiant -> UI : saisirLogin(mdp)
     UI -> Metier : verifierLogin()
     Metier -> DB : getUser()
-    DB --> Metier : null
 
     alt Identifiants invalides
+        DB --> Metier : null
         Metier --> UI : erreurConnexion
         UI --> Etudiant : afficherErreur
     else Identifiants valides

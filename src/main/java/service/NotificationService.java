@@ -8,15 +8,14 @@ import java.util.List;
 
 public class NotificationService {
 
-    private NotificationDAO notificationDAO = new NotificationDAO();
+    private final NotificationDAO notificationDAO = new NotificationDAO();
 
     public void sendNotification(int userId, String message) {
-        Notification notification = new Notification();
-        notification.setUserId(userId);
-        notification.setMessage(message);
-        notification.setNotificationDate(new Date());
-
-        notificationDAO.addNotification(notification);
+        Notification n = new Notification();
+        n.setUserId(userId);
+        n.setMessage(message);
+        n.setNotificationDate(new Date());
+        notificationDAO.addNotification(n);
     }
 
     public List<Notification> getUserNotifications(int userId) {

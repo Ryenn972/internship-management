@@ -1,26 +1,39 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-    <title>Login</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8">
+    <title>Connexion — Gestion des stages</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 
-<h2>Login</h2>
+<div class="login-box">
+    <h2>🎓 Gestion des stages</h2>
+    <h3>Connexion</h3>
 
-<form action="../login" method="post">
-    Email: <input type="text" name="email" required><br>
-    Password: <input type="password" name="password" required><br>
-    <input type="submit" value="Login">
-</form>
+    <% if (request.getAttribute("error") != null) { %>
+        <p class="error"><%= request.getAttribute("error") %></p>
+    <% } %>
+    <% if (request.getParameter("registered") != null) { %>
+        <p class="success">Inscription réussie ! Vous pouvez vous connecter.</p>
+    <% } %>
 
-<%
-    if(request.getParameter("error") != null){
-%>
-    <p style="color:red;">Invalid email or password</p>
-<%
-    }
-%>
+    <form action="${pageContext.request.contextPath}/login" method="post">
+        <label>Email</label>
+        <input type="email" name="email" required autofocus>
+
+        <label>Mot de passe</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <p style="margin-top:15px;">
+        Pas encore de compte ?
+        <a href="${pageContext.request.contextPath}/register">S'inscrire</a>
+    </p>
+</div>
 
 </body>
 </html>

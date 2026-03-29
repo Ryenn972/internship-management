@@ -1,136 +1,156 @@
-# Internship Management Web Application (Java JEE)
+# 🎓 Internship Management System — Java JEE
 
-## Project Description
-
-This project is a Java JEE web application developed to manage internship applications for a school.
-The application allows students to apply for internship offers, companies to publish offers, managers to validate applications, and administrators to manage users.
-
-The project includes UML modeling, database design, Java JEE development, and a final presentation.
+A full-stack Java JEE web application for managing internship applications in a school context.
+Students can browse offers and apply, companies can manage their listings, pedagogical managers review and validate applications, and administrators oversee all users.
 
 ---
 
-## Features
+## ✨ Features
 
-The application supports the following features:
+| Role | Capabilities |
+|------|-------------|
+| **Student** | Register, browse offers, apply (once per offer), track application status, receive notifications |
+| **Company** | Register, create / edit / delete their own internship offers |
+| **Manager** | View all applications, validate or reject them (triggers automatic notifications) |
+| **Admin** | Create, delete and assign roles to any user |
 
-* User authentication
-* Role management (student, company, manager, admin)
-* Internship offer management (CRUD)
-* Internship offer consultation
-* Internship application submission
-* Application validation or rejection
-* Notifications to users
-* User management (admin)
+All users share: login / logout, role-based dashboard, session management.
 
 ---
 
-## Project Structure
+## 🏗️ Architecture
+
+The application follows a strict **4-layer architecture**:
+
+```
+Presentation  →  JSP + CSS
+Controller    →  Servlets (one per feature)
+Service       →  Business logic
+DAO           →  SQL via JDBC
+Database      →  MariaDB / MySQL
+```
+
+An `AuthFilter` intercepts every request to enforce authentication and role-based access control before any servlet is reached.
+
+---
+
+## 📁 Project Structure
 
 ```
 internship-management/
 │
 ├── database/
-│   ├── schema.sql
-│   ├── data.sql
+│   ├── schema.sql          # Table definitions
+│   └── data.sql            # Seed data (roles + default admin)
 │
 ├── diagrams/
-│   ├── usecase.puml
-│   ├── activity.puml
-│   ├── sequence.puml
-│   ├── class.puml
+│   ├── cas_util.drawio     # Use case diagram (draw.io — main reference)
+│   ├── activity.uml        # Activity diagram (PlantUML)
+│   ├── sequence.uml        # Sequence diagram (PlantUML)
+│   └── use_case.uml        # Use case diagram (PlantUML — secondary)
 │
-├── src/
-│   ├── model/
-│   ├── dao/
-│   ├── service/
-│   ├── controller/
-│
-├── webapp/
-│   ├── jsp/
-│
-└── README.md
+└── src/main/
+    ├── java/
+    │   ├── model/          # Plain Java objects (User, InternshipOffer, Application, Notification)
+    │   ├── dao/            # Database access (JDBC PreparedStatements)
+    │   ├── service/        # Business rules and orchestration
+    │   ├── controller/     # HttpServlets (one per resource)
+    │   ├── filter/         # AuthFilter — security layer
+    │   └── util/           # DatabaseConnection, PasswordUtil (SHA-256)
+    │
+    └── webapp/
+        ├── css/style.css
+        ├── jsp/            # Views (login, register, dashboard, offers, applications…)
+        └── WEB-INF/web.xml # Servlet and filter mappings
 ```
 
 ---
 
-## Database Setup (MariaDB)
+## 🗄️ Database
 
-### 1. Open MariaDB
+**Tables:** `role`, `user`, `internship_offer`, `application`, `notification`
 
-```
+**Key relationships:**
+- A `user` has one `role` (student / company / manager / admin)
+- A `user` (company) creates many `internship_offer`
+- A `user` (student) submits many `application`
+- An `application` links one student to one offer
+- A `user` receives many `notification`
+
+Passwords are stored as **SHA-256 hashes** — never in plain text.
+
+---
+
+## ⚙️ Setup
+
+### Requirements
+- Java 11+
+- Apache Tomcat 9+
+- MariaDB or MySQL
+- Maven (optional but recommended)
+
+### 1. Database
+
+```bash
 mysql -u root -p
-```
-
-### 2. Create database and tables
-
-```
 source database/schema.sql
-```
-
-### 3. Insert initial data (roles)
-
-```
 source database/data.sql
 ```
 
----
+### 2. Configuration
 
-## Database Structure
+Edit `src/main/java/util/DatabaseConnection.java` with your credentials:
 
-The database contains the following tables:
+```java
+private static final String URL      = "jdbc:mysql://localhost:3306/internship_management?useSSL=false&serverTimezone=UTC";
+private static final String USER     = "root";
+private static final String PASSWORD = "your_password";
+```
 
-* role
-* user
-* internship_offer
-* application
-* notification
+### 3. Build & Deploy
 
-### Main Relationships
+Build a `.war` file and drop it into Tomcat's `webapps/` folder, or deploy directly from your IDE (IntelliJ / Eclipse).
 
-* A role can have many users
-* A company (user) can create many internship offers
-* A student (user) can submit many applications
-* An internship offer can have many applications
-* A user can receive many notifications
+### 4. Default admin account
 
----
+| Email | Password |
+|-------|----------|
+| `admin@school.fr` | `admin` |
 
-## Application Architecture
-
-The application follows a layered architecture:
-
-1. Presentation Layer (JSP / HTML / CSS)
-2. Controller Layer (Servlets)
-3. Business Layer (Services)
-4. Data Access Layer (DAO)
-5. Database (MariaDB)
+> ⚠️ Change this password immediately in production.
 
 ---
 
-## UML Diagrams
+## 🔐 Security
 
-The project includes the following UML diagrams:
-
-* Use Case Diagram
-* Activity Diagram
-* Sequence Diagram
-* Class Diagram
-* Database Schema
+- All routes are protected by `AuthFilter` — unauthenticated requests are redirected to `/login`
+- Role-based access: `/admin` → admin only, `/manager` → manager only, offer mutations → company only
+- Passwords hashed with SHA-256 via `PasswordUtil`
+- Duplicate application prevention (one student per offer)
+- Company users can only edit or delete their own offers
 
 ---
 
-## Technologies Used
+## 🧪 Technologies
 
-* Java JEE
-* Servlets
-* JSP
-* MariaDB / MySQL
-* JDBC
-* UML (PlantUML)
-* Git / GitHub
+- **Backend:** Java JEE, Servlets, JDBC
+- **Frontend:** JSP, HTML5, CSS3
+- **Database:** MariaDB / MySQL
+- **Modeling:** PlantUML, draw.io
+- **Version control:** Git
 
 ---
 
-## Author
+## 📊 UML Diagrams
 
-Student project – Internship Management System
+Three diagrams are included in the `/diagrams` folder:
+
+- **Use Case Diagram** — actors, main features, `<<include>>` and `<<extend>>` relations
+- **Activity Diagram** — full internship application workflow with swimlanes (Student / System / Manager)
+- **Sequence Diagram** — detailed interaction flow: student login → offer consultation → application submission → manager decision → notification
+
+---
+
+## 👤 Author
+
+[Ryenn](https://github.com/Ryenn972) - Student project — Internship Management System

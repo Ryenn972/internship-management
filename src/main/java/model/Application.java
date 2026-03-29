@@ -3,59 +3,45 @@ package model;
 import java.util.Date;
 
 public class Application {
-    private int idApplication;
-    private Date applicationDate;
+    private int    idApplication;
+    private Date   applicationDate;
     private String status;
-    private int studentId;
-    private int offerId;
+    private int    studentId;
+    private int    offerId;
+
+    // Joined fields (not persisted)
+    private String studentName;
+    private String offerTitle;
 
     public Application() {}
 
-    public Application(int idApplication, Date applicationDate, String status, int studentId, int offerId) {
-        this.idApplication = idApplication;
+    public Application(int idApplication, Date applicationDate,
+                       String status, int studentId, int offerId) {
+        this.idApplication   = idApplication;
         this.applicationDate = applicationDate;
-        this.status = status;
-        this.studentId = studentId;
-        this.offerId = offerId;
+        this.status          = status;
+        this.studentId       = studentId;
+        this.offerId         = offerId;
     }
 
-    public int getIdApplication() {
-        return idApplication;
-    }
+    public int    getIdApplication()                        { return idApplication; }
+    public void   setIdApplication(int idApplication)      { this.idApplication = idApplication; }
 
-    public void setIdApplication(int idApplication) {
-        this.idApplication = idApplication;
-    }
+    public Date   getApplicationDate()                      { return applicationDate; }
+    public void   setApplicationDate(Date applicationDate)  { this.applicationDate = applicationDate; }
 
-    public Date getApplicationDate() {
-        return applicationDate;
-    }
+    public String getStatus()               { return status; }
+    public void   setStatus(String status)  { this.status = status; }
 
-    public void setApplicationDate(Date applicationDate) {
-        this.applicationDate = applicationDate;
-    }
+    public int  getStudentId()              { return studentId; }
+    public void setStudentId(int studentId) { this.studentId = studentId; }
 
-    public String getStatus() {
-        return status;
-    }
+    public int  getOfferId()            { return offerId; }
+    public void setOfferId(int offerId) { this.offerId = offerId; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getStudentName()                  { return studentName; }
+    public void   setStudentName(String studentName){ this.studentName = studentName; }
 
-    public int getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(int studentId) {
-        this.studentId = studentId;
-    }
-
-    public int getOfferId() {
-        return offerId;
-    }
-
-    public void setOfferId(int offerId) {
-        this.offerId = offerId;
-    }
+    public String getOfferTitle()                   { return offerTitle; }
+    public void   setOfferTitle(String offerTitle)  { this.offerTitle = offerTitle; }
 }

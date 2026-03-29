@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ApplicationService {
 
-    private ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final ApplicationDAO applicationDAO = new ApplicationDAO();
 
     public boolean apply(Application application) {
         return applicationDAO.apply(application);
@@ -17,7 +17,15 @@ public class ApplicationService {
         return applicationDAO.getAllApplications();
     }
 
+    public List<Application> getByStudentId(int studentId) {
+        return applicationDAO.getByStudentId(studentId);
+    }
+
     public boolean updateStatus(int idApplication, String status) {
         return applicationDAO.updateStatus(idApplication, status);
+    }
+
+    public int getStudentIdByApplication(int idApplication) {
+        return applicationDAO.getStudentIdByApplication(idApplication);
     }
 }

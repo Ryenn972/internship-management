@@ -6,7 +6,8 @@ import model.InternshipOffer;
 import java.util.List;
 
 public class OfferService {
-    private OfferDAO offerDAO = new OfferDAO();
+
+    private final OfferDAO offerDAO = new OfferDAO();
 
     public boolean addOffer(InternshipOffer offer) {
         return offerDAO.addOffer(offer);
@@ -14,6 +15,10 @@ public class OfferService {
 
     public List<InternshipOffer> getAllOffers() {
         return offerDAO.getAllOffers();
+    }
+
+    public List<InternshipOffer> getByCompanyId(int companyId) {
+        return offerDAO.getByCompanyId(companyId);
     }
 
     public boolean deleteOffer(int idOffer) {
