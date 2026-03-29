@@ -115,7 +115,7 @@ Build a `.war` file and drop it into Tomcat's `webapps/` folder, or deploy direc
 
 | Email | Password |
 |-------|----------|
-| `admin@school.fr` | `admin` |
+| `admin@3wacademy.fr` | `admin` |
 
 > ⚠️ Change this password immediately in production.
 
