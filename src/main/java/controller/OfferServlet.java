@@ -1,7 +1,9 @@
 package controller;
 
+import model.Application;
 import model.InternshipOffer;
 import model.User;
+import service.ApplicationService;
 import service.OfferService;
 
 import jakarta.servlet.ServletException;
@@ -9,36 +11,51 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @WebServlet("/offer")
 public class OfferServlet extends HttpServlet {
 
-    private final OfferService offerService = new OfferService();
+    private final OfferService        offerService        = new OfferService();
+    private final ApplicationService  applicationService  = new ApplicationService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute("user");
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
         switch (action) {
 
             case "list":
-                // Company voit ses propres offres ; autres acteurs voient tout
-                if (user.getIdRole() == 2) {
+                // Entreprise voit ses propres offres, tous les autres voient tout
+                if (user != null && user.getIdRole() == 2) {
                     request.setAttribute("offers", offerService.getByCompanyId(user.getIdUser()));
                 } else {
                     request.setAttribute("offers", offerService.getAllOffers());
                 }
+
+                // Pour un étudiant connecté : on calcule les offres déjà postulées
+                // pour griser le bouton "Postuler"
+                if (user != null && user.getIdRole() == 1) {
+                    List<Application> myApps = applicationService.getByStudentId(user.getIdUser());
+                    Set<Integer> appliedIds = new HashSet<>();
+                    for (Application a : myApps) {
+                        appliedIds.add(a.getOfferId());
+                    }
+                    request.setAttribute("appliedOfferIds", appliedIds);
+                }
+
                 request.getRequestDispatcher("/jsp/offers.jsp").forward(request, response);
                 break;
 
             case "add":
-                // Réservé aux entreprises
-                if (user.getIdRole() != 2) {
+                if (user == null || user.getIdRole() != 2) {
                     response.sendRedirect(request.getContextPath() + "/offer?action=list");
                     return;
                 }
@@ -46,13 +63,12 @@ public class OfferServlet extends HttpServlet {
                 break;
 
             case "edit":
-                if (user.getIdRole() != 2) {
+                if (user == null || user.getIdRole() != 2) {
                     response.sendRedirect(request.getContextPath() + "/offer?action=list");
                     return;
                 }
                 int idEdit = Integer.parseInt(request.getParameter("id"));
                 InternshipOffer toEdit = offerService.getOfferById(idEdit);
-                // Vérifier que l'offre appartient à cette entreprise
                 if (toEdit == null || toEdit.getCompanyId() != user.getIdUser()) {
                     response.sendRedirect(request.getContextPath() + "/offer?action=list");
                     return;
@@ -62,7 +78,7 @@ public class OfferServlet extends HttpServlet {
                 break;
 
             case "delete":
-                if (user.getIdRole() != 2) {
+                if (user == null || user.getIdRole() != 2) {
                     response.sendRedirect(request.getContextPath() + "/offer?action=list");
                     return;
                 }
@@ -86,7 +102,6 @@ public class OfferServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute("user");
 
-        // Seules les entreprises peuvent créer/modifier des offres
         if (user == null || user.getIdRole() != 2) {
             response.sendRedirect(request.getContextPath() + "/offer?action=list");
             return;

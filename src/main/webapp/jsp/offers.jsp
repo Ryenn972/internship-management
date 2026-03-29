@@ -1,10 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.util.List, model.InternshipOffer, model.User" %>
+<%@ page import="java.util.List, java.util.Set, model.InternshipOffer, model.User" %>
 <%
     User user = (User) session.getAttribute("user");
-    if (user == null) { response.sendRedirect(request.getContextPath() + "/login"); return; }
+    // Pas de redirection si non connecté — la page est publique
+    int role = (user != null) ? user.getIdRole() : 0;
     List<InternshipOffer> offers = (List<InternshipOffer>) request.getAttribute("offers");
-    int role = user.getIdRole();
+    Set<Integer> appliedOfferIds = (Set<Integer>) request.getAttribute("appliedOfferIds");
+    if (appliedOfferIds == null) appliedOfferIds = new java.util.HashSet<>();
 %>
 <!DOCTYPE html>
 <html lang="fr">
@@ -18,7 +20,9 @@
 <nav class="navbar">
     <span class="nav-brand">🎓 Gestion des stages</span>
     <div>
-        <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp">Dashboard</a>
+        <% if (user != null) { %>
+            <a href="${pageContext.request.contextPath}/jsp/dashboard.jsp">Dashboard</a>
+        <% } %>
         <a href="${pageContext.request.contextPath}/offer?action=list">Offres</a>
         <% if (role == 1) { %>
             <a href="${pageContext.request.contextPath}/application?action=list">Mes candidatures</a>
@@ -29,7 +33,11 @@
         <% } %>
         <% if (role == 3) { %><a href="${pageContext.request.contextPath}/manager?action=list">Candidatures</a><% } %>
         <% if (role == 4) { %><a href="${pageContext.request.contextPath}/admin?action=list">Utilisateurs</a><% } %>
-        <a href="${pageContext.request.contextPath}/logout">Déconnexion</a>
+        <% if (user != null) { %>
+            <a href="${pageContext.request.contextPath}/logout">Déconnexion</a>
+        <% } else { %>
+            <a href="${pageContext.request.contextPath}/login">Se connecter</a>
+        <% } %>
     </div>
 </nav>
 
@@ -40,6 +48,10 @@
             <a class="btn" href="${pageContext.request.contextPath}/offer?action=add">+ Nouvelle offre</a>
         <% } %>
     </div>
+
+    <% if (request.getAttribute("success") != null) { %>
+        <p class="success"><%= request.getAttribute("success") %></p>
+    <% } %>
 
     <% if (request.getAttribute("info") != null) { %>
         <p class="info"><%= request.getAttribute("info") %></p>
@@ -66,11 +78,19 @@
                 <td><%= offer.getCompanyName() != null ? offer.getCompanyName() : "—" %></td>
                 <td><%= offer.getPublicationDate() %></td>
                 <td>
-                    <% if (role == 1) { %>
-                        <form action="${pageContext.request.contextPath}/application" method="post" style="display:inline">
-                            <input type="hidden" name="offerId" value="<%= offer.getIdOffer() %>">
-                            <button type="submit" class="btn btn-sm">Postuler</button>
-                        </form>
+                    <% if (role == 1) {
+                        boolean alreadyApplied = appliedOfferIds.contains(offer.getIdOffer());
+                        if (alreadyApplied) { %>
+                            <button class="btn btn-sm btn-secondary" disabled>✔ Déjà postulé</button>
+                        <% } else { %>
+                            <form action="${pageContext.request.contextPath}/application" method="post" style="display:inline">
+                                <input type="hidden" name="offerId" value="<%= offer.getIdOffer() %>">
+                                <button type="submit" class="btn btn-sm">Postuler</button>
+                            </form>
+                        <% }
+                    } else if (role == 0) { %>
+                        <a class="btn btn-sm btn-secondary"
+                           href="${pageContext.request.contextPath}/login">Se connecter pour postuler</a>
                     <% } else if (role == 2) { %>
                         <a class="btn btn-sm btn-secondary"
                            href="${pageContext.request.contextPath}/offer?action=edit&id=<%= offer.getIdOffer() %>">Modifier</a>
