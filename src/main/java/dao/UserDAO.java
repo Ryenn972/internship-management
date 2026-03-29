@@ -85,10 +85,42 @@ public class UserDAO {
 
     public boolean deleteUser(int idUser) {
         try (Connection conn = DatabaseConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(
-                    "DELETE FROM user WHERE id_user=?");
-            ps.setInt(1, idUser);
-            return ps.executeUpdate() > 0;
+            conn.setAutoCommit(false); // transaction
+
+            // 1. Supprimer les notifications de l'utilisateur
+            PreparedStatement ps1 = conn.prepareStatement(
+                    "DELETE FROM notification WHERE user_id = ?");
+            ps1.setInt(1, idUser);
+            ps1.executeUpdate();
+
+            // 2. Supprimer les candidatures de l'utilisateur (si étudiant)
+            PreparedStatement ps2 = conn.prepareStatement(
+                    "DELETE FROM application WHERE student_id = ?");
+            ps2.setInt(1, idUser);
+            ps2.executeUpdate();
+
+            // 3. Si c'est une entreprise : supprimer les candidatures liées à ses offres
+            //    puis supprimer ses offres
+            PreparedStatement ps3 = conn.prepareStatement(
+                    "DELETE FROM application WHERE offer_id IN " +
+                            "(SELECT id_offer FROM internship_offer WHERE company_id = ?)");
+            ps3.setInt(1, idUser);
+            ps3.executeUpdate();
+
+            PreparedStatement ps4 = conn.prepareStatement(
+                    "DELETE FROM internship_offer WHERE company_id = ?");
+            ps4.setInt(1, idUser);
+            ps4.executeUpdate();
+
+            // 4. Supprimer l'utilisateur lui-même
+            PreparedStatement ps5 = conn.prepareStatement(
+                    "DELETE FROM user WHERE id_user = ?");
+            ps5.setInt(1, idUser);
+            boolean deleted = ps5.executeUpdate() > 0;
+
+            conn.commit();
+            return deleted;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
