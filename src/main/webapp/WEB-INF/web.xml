@@ -9,7 +9,7 @@
 
     <!-- Page d'accueil par défaut -->
     <welcome-file-list>
-        <welcome-file>login</welcome-file>
+        <welcome-file>offer</welcome-file>
     </welcome-file-list>
 
     <!-- Filtre de sécurité (pas d'annotation @WebFilter dans le code, donc on le déclare ici) -->
